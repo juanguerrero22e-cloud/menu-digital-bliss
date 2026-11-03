@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cookie Bliss | Galletas Artesanales & Pays</title>
+    <meta name="description"
+        content="Cookie Bliss - Galletas artesanales y pays por lotes semanales. Pide por WhatsApp.">
+
+    <!-- Tailwind CSS vía CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Configuración personalizada de Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cb-bg': '#ECEAE6',
+                        'cb-primary': '#822B3B',
+                        'cb-secondary': '#E5958E',
+                        'cb-text': '#4A3E3D',
+                        'cb-card': '#FFFFFF',
+                        'cb-wa': '#25D366',
+                    },
+                    fontFamily: {
+                        'sans': ['Outfit', 'Poppins', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -4px rgba(130, 43, 59, 0.12)',
+                        'card': '0 2px 12px -2px rgba(74, 62, 61, 0.08)',
+                        'product': '0 2px 8px -2px rgba(74, 62, 61, 0.10)',
+                        'drawer': '-8px 0 32px -4px rgba(74, 62, 61, 0.20)',
+                        'center-card': '0 20px 50px -12px rgba(130, 43, 59, 0.30)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Firebase (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script>
+        // =============================================
+        // CONFIGURACIÓN GLOBAL DE FIREBASE (Cookie Bliss)
+        // =============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5dL5lW8BJRjjsvLl5r6IWhAIE75UB_MI",
+            authDomain: "bliss-web-78d99.firebaseapp.com",
+            projectId: "bliss-web-78d99",
+            storageBucket: "bliss-web-78d99.firebasestorage.app",
+            messagingSenderId: "316591611987",
+            appId: "1:316591611987:web:a8a3593da283d18dfa66a6",
+            measurementId: "G-WW0G6M5LSQ"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        @keyframes pulse-soft {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.6;
+            }
+        }
+
+        .animate-pulse-soft {
+            animation: pulse-soft 2s ease-in-out infinite;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.2);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .animate-pop {
+            animation: pop 0.35s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .drawer-backdrop {
+            transition: opacity 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .drawer-panel {
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: auto;
+        }
+
+        .drawer-closed {
+            pointer-events: none;
+        }
+
+        .drawer-closed .drawer-panel {
+            transform: translateX(100%);
+            pointer-events: none;
+        }
+
+        .drawer-closed .drawer-backdrop {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        body.no-scroll {
+            overflow: hidden;
+        }
+
+        /* ============================================= */
+        /* CARRUSEL 3D CENTRAL                           */
+        /* ============================================= */
+        #menu-carousel {
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+            gap: 16px;
+            perspective: 1600px;
+            transform-style: preserve-3d;
+        }
+
+        .carousel-card {
+            transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                width 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.5s ease,
+                filter 0.5s ease;
+            transform-origin: center center;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+
+        /* TARJETA CENTRAL */
+        .carousel-card.is-center {
+            order: 2;
+            width: 42%;
+            transform: scale(1.05) translateZ(0);
+            opacity: 1;
+            z-index: 20;
+            pointer-events: auto;
+            filter: none;
+            box-shadow: 0 20px 50px -12px rgba(130, 43, 59, 0.30);
+        }
+
+        /* TARJETA IZQUIERDA */
+        .carousel-card.is-left {
+            order: 1;
+            width: 28%;
+            transform: scale(0.85) translateZ(-60px);
+            opacity: 0.65;
+            z-index: 10;
+            pointer-events: none;
+            filter: saturate(0.7);
+        }
+
+        /* TARJETA DERECHA */
+        .carousel-card.is-right {
+            order: 3;
+            width: 28%;
+            transform: scale(0.85) translateZ(-60px);
+            opacity: 0.65;
+            z-index: 10;
+            pointer-events: none;
+            filter: saturate(0.7);
+        }
+
+        .carousel-card.is-hidden {
+            transform: scale(0.75) translateZ(-120px);
+            opacity: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @media (max-width: 639px) {
+            #menu-carousel {
+                gap: 0;
+            }
+
+            .carousel-card.is-center {
+                width: 100%;
+                transform: scale(1) translateZ(0);
+                position: relative;
+            }
+
+            .carousel-card.is-left,
+            .carousel-card.is-right {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%) scale(0.85);
+                opacity: 0;
+                pointer-events: none;
+            }
+        }
+
+        /* Feedback táctil */
+        .btn-interactive {
+            transition: transform 0.15s ease, background-color 0.2s ease;
+        }
+
+        .btn-interactive:active {
+            transform: scale(0.94);
+        }
+
+        .btn-interactive>*,
+        .btn-interactive i,
+        .btn-interactive svg,
+        .btn-interactive span,
+        .btn-interactive img {
+            pointer-events: none !important;
+        }
+
+        .nav-arrow {
+            transition: background-color 0.2s ease, transform 0.15s ease;
+        }
+
+        .nav-arrow:hover {
+            background-color: rgba(130, 43, 59, 0.9);
+        }
+
+        .nav-arrow:active {
+            transform: translateY(-50%) scale(0.92);
+        }
+
+        .nav-arrow i,
+        .nav-arrow svg {
+            pointer-events: none !important;
+        }
+
+        button,
+        a,
+        [role='button'] {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #cart-button,
+        .btn-agregar,
+        .btn-sumar,
+        .btn-restar,
+        .btn-eliminar,
+        .nav-arrow,
+        .dot-btn,
+        #btn-whatsapp,
+        #drawer-close {
+            pointer-events: auto;
+        }
+    </style>
+</head>
+
+<body class="bg-cb-bg text-cb-text font-sans antialiased">
+
+    <!-- ============================================= -->
+    <!-- HEADER / NAVBAR                               -->
+    <!-- ============================================= -->
+    <header id="main-header" class="sticky top-0 z-50 bg-cb-bg/80 backdrop-blur-md border-b border-cb-secondary/20">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+
+                <a href="#" class="relative z-20 flex items-center gap-2 group pointer-events-auto">
+                    <div
+                        class="w-9 h-9 rounded-full bg-cb-primary flex items-center justify-center shadow-soft pointer-events-none">
+                        <i data-lucide="cookie" class="w-5 h-5 text-cb-bg pointer-events-none"></i>
+                    </div>
+                    <span class="text-xl sm:text-2xl font-extrabold tracking-tight text-cb-primary pointer-events-none">
+                        Cookie <span class="text-cb-secondary">Bliss</span>
+                    </span>
+                </a>
+
+                <div class="relative z-20 flex items-center gap-3 sm:gap-5 pointer-events-auto">
+                    <div id="status-indicator"
+                        class="hidden sm:flex items-center gap-2 bg-cb-card/70 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-card border border-cb-secondary/20">
+                        <span id="status-dot"
+                            class="w-2.5 h-2.5 rounded-full bg-cb-wa animate-pulse-soft pointer-events-none"></span>
+                        <span id="status-text"
+                            class="text-xs sm:text-sm font-semibold text-cb-text whitespace-nowrap pointer-events-none">
+                            Pedidos Abiertos
+                        </span>
+                    </div>
+
+                    <button id="cart-button" type="button" aria-label="Abrir carrito de compras"
+                        class="btn-interactive relative z-20 flex items-center justify-center w-11 h-11 rounded-full bg-cb-card shadow-card border border-cb-secondary/20 hover:bg-cb-secondary/10 pointer-events-auto cursor-pointer">
+                        <i data-lucide="shopping-bag" class="w-5 h-5 text-cb-primary pointer-events-none"></i>
+                        <span id="cart-count-badge"
+                            class="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 flex items-center justify-center text-[11px] font-bold text-white bg-cb-primary rounded-full shadow-sm opacity-0 scale-0 transition-all duration-200 pointer-events-none">
+                            0
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================= -->
+    <!-- HERO / STATUS BANNER                          -->
+    <!-- ============================================= -->
+    <section id="hero" class="relative overflow-hidden">
+        <div class="pointer-events-none absolute -top-24 -right-24 w-72 h-72 bg-cb-secondary/20 rounded-full blur-3xl">
+        </div>
+        <div class="pointer-events-none absolute -bottom-32 -left-24 w-80 h-80 bg-cb-primary/10 rounded-full blur-3xl">
+        </div>
+
+        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-12 sm:pt-16 sm:pb-20 text-center">
+
+            <div
+                class="inline-flex items-center gap-2 bg-cb-card/70 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-card border border-cb-secondary/20 mb-6">
+                <i data-lucide="sparkles" class="w-4 h-4 text-cb-secondary pointer-events-none"></i>
+                <span class="text-xs sm:text-sm font-medium text-cb-text pointer-events-none">Lotes semanales · Hecho a
+                    mano</span>
+            </div>
+
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight text-cb-primary mb-4">
+                Galletas que <br class="hidden sm:block">
+                <span class="text-cb-secondary">endulzan</span> tu semana
+            </h1>
+
+            <p class="text-base sm:text-lg text-cb-text/80 max-w-xl mx-auto mb-8 leading-relaxed">
+                Menú rotativo de galletas artesanales y pays. Pide antes del <strong
+                    class="text-cb-primary font-semibold">martes <span class="hora-cierre-txt">1:00 PM</span></strong> y recibe tu pedido el jueves.
+            </p>
+
+            <div
+                class="bg-cb-card rounded-3xl shadow-soft border border-cb-secondary/20 p-5 sm:p-7 max-w-lg mx-auto mb-8">
+                <div id="timer-block">
+                <p class="text-xs uppercase tracking-widest font-semibold text-cb-secondary mb-3">Cierra en</p>
+                <div id="countdown" class="flex items-center justify-center gap-2 sm:gap-4">
+                    <div class="flex flex-col items-center">
+                        <span id="cd-days"
+                            class="text-2xl sm:text-3xl font-extrabold text-cb-primary tabular-nums">00</span>
+                        <span
+                            class="text-[10px] sm:text-xs uppercase tracking-wider text-cb-text/60 font-medium">Días</span>
+                    </div>
+                    <span class="text-xl sm:text-2xl font-bold text-cb-secondary/50 -mt-4">:</span>
+                    <div class="flex flex-col items-center">
+                        <span id="cd-hours"
+                            class="text-2xl sm:text-3xl font-extrabold text-cb-primary tabular-nums">00</span>
+                        <span
+                            class="text-[10px] sm:text-xs uppercase tracking-wider text-cb-text/60 font-medium">Horas</span>
+                    </div>
+                    <span class="text-xl sm:text-2xl font-bold text-cb-secondary/50 -mt-4">:</span>
+                    <div class="flex flex-col items-center">
+                        <span id="cd-minutes"
+                            class="text-2xl sm:text-3xl font-extrabold text-cb-primary tabular-nums">00</span>
+                        <span
+                            class="text-[10px] sm:text-xs uppercase tracking-wider text-cb-text/60 font-medium">Min</span>
+                    </div>
+                    <span class="text-xl sm:text-2xl font-bold text-cb-secondary/50 -mt-4">:</span>
+                    <div class="flex flex-col items-center">
+                        <span id="cd-seconds"
+                            class="text-2xl sm:text-3xl font-extrabold text-cb-primary tabular-nums">00</span>
+                        <span
+                            class="text-[10px] sm:text-xs uppercase tracking-wider text-cb-text/60 font-medium">Seg</span>
+                    </div>
+                </div>
+
+                </div>
+
+                <div id="closed-notice" class="hidden">
+                    <p class="text-xs uppercase tracking-widest font-semibold text-cb-primary mb-2">Pedidos cerrados</p>
+                    <p id="closed-notice-text" class="text-sm text-cb-text/70"></p>
+                </div>
+            </div>
+
+            <a href="#menu"
+                class="btn-interactive relative z-20 inline-flex items-center gap-2 bg-cb-primary text-white font-semibold px-7 py-3.5 rounded-full shadow-soft hover:bg-cb-primary/90 pointer-events-auto cursor-pointer">
+                <i data-lucide="utensils" class="w-4 h-4 pointer-events-none"></i>
+                <span class="pointer-events-none">Ver menú de la semana</span>
+                <i data-lucide="arrow-down" class="w-4 h-4 pointer-events-none"></i>
+            </a>
+
+        </div>
+    </section>
+
+    <!-- ============================================= -->
+    <!-- SECCIÓN MENÚ INTERACTIVO (CARRUSEL 3D CENTRAL)-->
+    <!-- ============================================= -->
+    <section id="menu" class="relative py-12 sm:py-16 overflow-hidden">
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="text-center mb-8">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-cb-primary mb-2">
+                    Menú de la semana
+                </h2>
+                <p class="text-sm sm:text-base text-cb-text/70">
+                    Desliza o usa las flechas para explorar las rotaciones del menú
+                </p>
+            </div>
+
+            <!-- Contenedor del carrusel 3D -->
+            <div id="menu-carousel-container" class="relative">
+
+                <!-- Flechas de navegación -->
+                <button id="nav-prev" type="button" aria-label="Menú anterior"
+                    class="nav-arrow absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-cb-primary text-white shadow-soft flex items-center justify-center pointer-events-auto cursor-pointer">
+                    <i data-lucide="chevron-left" class="w-6 h-6 pointer-events-none"></i>
+                </button>
+
+                <button id="nav-next" type="button" aria-label="Menú siguiente"
+                    class="nav-arrow absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 z-30 w-11 h-11 rounded-full bg-cb-primary text-white shadow-soft flex items-center justify-center pointer-events-auto cursor-pointer">
+                    <i data-lucide="chevron-right" class="w-6 h-6 pointer-events-none"></i>
+                </button>
+
+                <!-- Escenario 3D -->
+                <div id="menu-carousel" class="relative min-h-[520px] sm:min-h-[560px] py-6">
+                    <!-- Tarjetas inyectadas dinámicamente -->
+                </div>
+
+            </div>
+
+            <!-- Dots -->
+            <div id="carousel-dots" class="flex items-center justify-center gap-2 mt-6"></div>
+
+        </div>
+    </section>
+
+    <!-- ============================================= -->
+    <!-- TOAST NOTIFICATIONS                           -->
+    <!-- ============================================= -->
+    <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[80] pointer-events-none"></div>
+
+    <!-- AVISO IMPORTANTE: burbuja + modal -->
+    <button id="aviso-bubble" type="button"
+        class="hidden fixed top-20 left-3 z-40 items-center gap-2 bg-cb-primary text-white text-xs sm:text-sm font-bold px-4 py-2.5 rounded-full shadow-soft animate-pulse-soft cursor-pointer">
+        <span>📢 Aviso Importante</span>
+    </button>
+    <div id="aviso-modal" class="hidden fixed inset-0 z-[90] bg-cb-text/70 backdrop-blur-sm overflow-y-auto">
+        <div class="min-h-full flex items-center justify-center p-4">
+            <div class="relative bg-cb-card rounded-3xl shadow-soft max-w-md w-full p-4">
+                <p class="text-center text-sm font-extrabold text-cb-primary mb-3">📢 Aviso Importante</p>
+                <img id="aviso-img" src="" alt="Aviso importante" class="w-full max-h-[70vh] object-contain rounded-2xl bg-cb-bg">
+                <button id="aviso-close" type="button"
+                    class="mt-4 w-full bg-cb-primary text-white font-bold py-3 rounded-full cursor-pointer">Cerrar aviso</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================= -->
+    <!-- DRAWER / MODAL DEL CARRITO                    -->
+    <!-- ============================================= -->
+    <div id="cart-drawer" class="drawer-closed fixed inset-0 z-[70]">
+        <div id="drawer-backdrop" class="drawer-backdrop absolute inset-0 bg-cb-text/50 backdrop-blur-sm"></div>
+
+        <aside id="drawer-panel"
+            class="drawer-panel absolute top-0 right-0 h-full w-full max-w-md bg-cb-card shadow-drawer flex flex-col"
+            role="dialog" aria-modal="true">
+
+            <div class="flex items-center justify-between px-5 py-4 border-b border-cb-secondary/20 bg-cb-bg/40">
+                <div class="flex items-center gap-2">
+                    <div
+                        class="w-9 h-9 rounded-full bg-cb-primary flex items-center justify-center pointer-events-none">
+                        <i data-lucide="shopping-bag" class="w-4 h-4 text-cb-bg pointer-events-none"></i>
+                    </div>
+                    <div>
+                        <h2 id="drawer-title" class="text-lg font-extrabold text-cb-primary leading-tight">Tu Carrito
+                            Bliss</h2>
+                        <p id="drawer-subtitle" class="text-[11px] text-cb-text/60 font-medium">0 productos</p>
+                    </div>
+                </div>
+                <button id="drawer-close" type="button" aria-label="Cerrar carrito"
+                    class="btn-interactive w-9 h-9 rounded-full bg-cb-card hover:bg-cb-secondary/20 flex items-center justify-center border border-cb-secondary/20 pointer-events-auto cursor-pointer">
+                    <i data-lucide="x" class="w-5 h-5 text-cb-primary pointer-events-none"></i>
+                </button>
+            </div>
+
+            <div id="cart-items-container" class="flex-1 overflow-y-auto px-5 py-4"></div>
+
+            <div id="cart-footer" class="border-t border-cb-secondary/20 bg-cb-bg/40 px-5 py-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-semibold text-cb-text">Total a pagar</span>
+                    <span id="cart-total" class="text-2xl font-extrabold text-cb-primary tabular-nums">$0 MXN</span>
+                </div>
+
+                <div>
+                    <label for="cart-notes"
+                        class="block text-[11px] font-semibold text-cb-text/70 mb-1 uppercase tracking-wide">Notas para
+                        tu pedido</label>
+                    <textarea id="cart-notes" rows="2"
+                        placeholder="Ej. Dirección de entrega, referencias, horario preferido..."
+                        class="w-full text-sm rounded-xl border border-cb-secondary/30 bg-cb-card px-3 py-2 text-cb-text placeholder:text-cb-text/40 focus:outline-none focus:ring-2 focus:ring-cb-secondary/50 focus:border-cb-secondary resize-none"></textarea>
+                </div>
+
+                <button id="btn-whatsapp" type="button"
+                    class="btn-interactive w-full flex items-center justify-center gap-2 bg-cb-wa hover:bg-cb-wa/90 text-white font-bold py-3.5 rounded-full shadow-soft disabled:opacity-50 disabled:cursor-not-allowed pointer-events-auto cursor-pointer">
+                    <i data-lucide="message-circle" class="w-5 h-5 pointer-events-none"></i>
+                    <span class="pointer-events-none">Pedir por WhatsApp</span>
+                </button>
+
+                <p class="text-[10px] text-cb-text/50 text-center">
+                    Serás redirigido a WhatsApp con tu pedido listo para enviar.
+                </p>
+            </div>
+
+        </aside>
+    </div>
+
+    <!-- ============================================= -->
+    <!-- SECCIÓN ¿CÓMO FUNCIONA?                       -->
+    <!-- ============================================= -->
+    <section id="how-it-works" class="relative py-12 sm:py-16 bg-cb-card/50">
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            <div class="text-center mb-10">
+                <div
+                    class="inline-flex items-center gap-2 bg-cb-card px-4 py-1.5 rounded-full shadow-card border border-cb-secondary/20 mb-4">
+                    <i data-lucide="help-circle" class="w-4 h-4 text-cb-secondary pointer-events-none"></i>
+                    <span class="text-xs sm:text-sm font-medium text-cb-text pointer-events-none">Proceso
+                        sencillo</span>
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-cb-primary mb-2">¿Cómo funciona?</h2>
+                <p class="text-sm sm:text-base text-cb-text/70 max-w-md mx-auto">
+                    Pedir tus galletas favoritas es muy fácil. Sigue estos 3 pasos.
+                </p>
+            </div>
+
+            <div id="how-it-works-steps" class="grid grid-cols-1 sm:grid-cols-3 gap-6"></div>
+
+        </div>
+    </section>
+
+    <!-- ============================================= -->
+    <!-- SECCIÓN REDES SOCIALES                        -->
+    <!-- ============================================= -->
+    <section id="contacto" class="relative py-12 sm:py-16">
+        <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-cb-primary rounded-3xl shadow-soft overflow-hidden relative">
+                <div
+                    class="pointer-events-none absolute -top-16 -right-16 w-48 h-48 bg-cb-secondary/20 rounded-full blur-2xl">
+                </div>
+                <div
+                    class="pointer-events-none absolute -bottom-20 -left-20 w-56 h-56 bg-cb-bg/10 rounded-full blur-2xl">
+                </div>
+
+                <div class="relative z-10 px-6 py-10 sm:px-12 sm:py-14 text-center">
+                    <div
+                        class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-cb-bg/10 mb-4 pointer-events-none">
+                        <i data-lucide="heart" class="w-7 h-7 text-cb-secondary pointer-events-none"></i>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-cb-bg mb-3">Conéctate con Cookie Bliss</h2>
+                    <p class="text-sm sm:text-base text-cb-bg/80 max-w-md mx-auto mb-8">
+                        Síguenos en redes para ver el menú de la semana, sorteos y novedades. ¡Escríbenos si tienes
+                        dudas!
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+                        <a href="https://www.instagram.com/cookie._bliss_?stkn=MWlhdGhrMml6MzQ4NA==" target="_blank"
+                            rel="noopener"
+                            class="btn-interactive relative z-10 w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-cb-bg text-cb-primary font-semibold px-6 py-3 rounded-full shadow-soft hover:bg-cb-bg/90 pointer-events-auto cursor-pointer">
+                            <span class="w-5 h-5 flex items-center justify-center pointer-events-none"><svg class="w-5 h-5 fill-current text-cb-primary" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.919 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></span>
+                            <span class="pointer-events-none">Síguenos en Instagram</span>
+                        </a>
+                        <a href="https://chat.whatsapp.com/I02wvilBxUl7ACm0b4A3MX?s=cl&p=a&mlu=4&ilr=4" target="_blank"
+                            rel="noopener"
+                            class="btn-interactive relative z-10 w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-cb-wa text-white font-semibold px-6 py-3 rounded-full shadow-soft hover:bg-cb-wa/90 pointer-events-auto cursor-pointer">
+                            <i data-lucide="message-circle" class="w-5 h-5 pointer-events-none"></i>
+                            <span class="pointer-events-none">Escríbenos por WhatsApp</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================= -->
+    <!-- FOOTER                                        -->
+    <!-- ============================================= -->
+    <footer id="main-footer" class="relative bg-cb-primary text-cb-bg/90 pt-12 pb-8">
+        <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-6 mb-8">
+                <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 rounded-full bg-cb-bg flex items-center justify-center pointer-events-none">
+                        <i data-lucide="cookie" class="w-5 h-5 text-cb-primary pointer-events-none"></i>
+                    </div>
+                    <span class="text-xl font-extrabold text-cb-bg">
+                        Cookie <span class="text-cb-secondary">Bliss</span>
+                    </span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="https://www.instagram.com/cookie._bliss_?stkn=MWlhdGhrMml6MzQ4NA==" target="_blank"
+                        rel="noopener" aria-label="Instagram"
+                        class="btn-interactive relative z-20 w-10 h-10 rounded-full bg-cb-bg/10 hover:bg-cb-secondary/30 flex items-center justify-center pointer-events-auto cursor-pointer">
+                        <svg class="w-5 h-5 fill-current text-white pointer-events-none" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.919 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </a>
+                    <a href="https://chat.whatsapp.com/I02wvilBxUl7ACm0b4A3MX?s=cl&p=a&mlu=4&ilr=4" target="_blank"
+                        rel="noopener" aria-label="WhatsApp"
+                        class="btn-interactive relative z-20 w-10 h-10 rounded-full bg-cb-wa/90 hover:bg-cb-wa flex items-center justify-center pointer-events-auto cursor-pointer">
+                        <i data-lucide="message-circle" class="w-5 h-5 text-white pointer-events-none"></i>
+                    </a>
+                </div>
+                <a href="admin.html" onclick="forzarLoginAdmin()"
+                    class="group inline-flex items-center gap-1.5 text-xs text-cb-bg/40 hover:text-cb-bg/80 transition-colors pointer-events-auto">
+                    <i data-lucide="lock" class="w-3.5 h-3.5 pointer-events-none"></i>
+                    <span class="underline underline-offset-2 pointer-events-none">Panel de administración</span>
+                </a>
+            </div>
+            <div class="border-t border-cb-bg/10 pt-6 text-center">
+                <p class="text-xs text-cb-bg/50">
+                    &copy; <span id="footer-year"></span> Cookie Bliss. Todos los derechos reservados.<br
+                        class="sm:hidden">
+                    Hecho con <span class="text-cb-secondary">♥</span> para los amantes de lo dulce.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================= -->
+    <!-- SCRIPTS                                       -->
+    <!-- ============================================= -->
+    <script>
+        const WHATSAPP_NUMBER = '5215500000000';
+        const STORAGE_KEYS = {
+            CARRITO: 'cookie_bliss_carrito'
+        };
+        const AUTH_KEY = 'restaurant_admin_auth';
+
+        // Forzar login siempre al presionar el acceso al admin
+        function forzarLoginAdmin() {
+            localStorage.removeItem(AUTH_KEY);
+        }
+
+        let MENUS_DATA = [
+            {
+                id: 'semana-a',
+                nombre: 'Rotación A',
+                activo: true,
+                badge: '✨ MENÚ DISPONIBLE ESTA SEMANA',
+                productos: [
+                    {
+                        id: 'a-galleta-1',
+                        nombre: 'Triple Chocolate',
+                        descripcion: 'Cookie a base de chocolate con chispas de chocolate de leche, chocolate blanco y chocolate semi amargo, decorada con chocolate blanco.',
+                        precio: 35,
+                        imagen: 'galleta 4.jpeg',
+                        tipo: 'galleta'
+                    },
+                    {
+                        id: 'a-galleta-2',
+                        nombre: 'Chispas de Chocolate',
+                        descripcion: 'Nuestra cookie clásica, cookie de vainilla con chispas de chocolate.',
+                        precio: 30,
+                        imagen: 'galleta 1.jpeg',
+                        tipo: 'galleta'
+                    },
+                    {
+                        id: 'a-galleta-3',
+                        nombre: 'Oreo',
+                        descripcion: 'Cookie a base de chocolate con trozos de galleta oreo y chispas de chocolate blanco, decoradas con nuestro queso crema especial y pequeños trozos de galleta oreo.',
+                        precio: 40,
+                        imagen: 'galleta 3.jpeg',
+                        tipo: 'galleta'
+                    },
+                    {
+                        id: 'a-pay-1',
+                        nombre: 'Pay de Queso',
+                        descripcion: 'Rebanada de nuestro pay de queso artesanal.',
+                        precio: 40,
+                        imagen: 'pay de queso.jpg',
+                        tipo: 'pay'
+                    }
+                ]
+            },
+            {
+                id: 'semana-b',
+                nombre: 'Rotación B',
+                activo: false,
+                badge: '🔒 PRÓXIMA ROTACIÓN',
+                productos: [
+                    {
+                        id: 'b-galleta-1',
+                        nombre: 'Red Velvet',
+                        descripcion: 'Cookie de red velvet con chispas de chocolate blanco, rellena y decorada de nuestro delicioso queso crema.',
+                        precio: 35,
+                        imagen: 'galleta 2.jpeg',
+                        tipo: 'galleta'
+                    },
+                    {
+                        id: 'b-galleta-2',
+                        nombre: 'Nutella',
+                        descripcion: 'Cookie a base de vainilla con chispas de chocolate y avellanas, rellena de nutella y decorada con un trozo de kinder bueno.',
+                        precio: 45,
+                        imagen: 'galleta 5.jpeg',
+                        tipo: 'galleta'
+                    },
+                    {
+                        id: 'b-galleta-3',
+                        nombre: 'Avellana',
+                        descripcion: 'Cookie a base de chocolate con trozos de avellana y chispas de chocolate blanco.',
+                        precio: 35,
+                        imagen: 'galleta 9.jpeg',
+                        tipo: 'galleta'
+                    },
+                    {
+                        id: 'b-pay-1',
+                        nombre: 'Pay de Queso',
+                        descripcion: 'Rebanada de nuestro pay de queso artesanal.',
+                        precio: 40,
+                        imagen: 'pay de queso.jpg',
+                        tipo: 'pay'
+                    }
+                ]
+            },
+            {
+                id: 'semana-c',
+                nombre: 'Rotación C',
+                activo: false,
+                badge: '🔒 PRÓXIMA ROTACIÓN',
+                productos: [
+                    {
+                        id: 'c-galleta-1',
+                        nombre: 'Chispitas Blancas',
+                        descripcion: 'Cookie de vainilla con deliciosas chispas de chocolate blanco.',
+                        precio: 30,
+                        imagen: 'galleta 7.jpeg',
+                        tipo: 'galleta'
+                    },
+                    {
+                        id: 'c-galleta-2',
+                        nombre: 'Mazapán',
+                        descripcion: 'Cookie de vainilla con trocitos de mazapán, rellena de crema de cacahuate Mazapán®, decorada con chocolate blanco y trozos de mazapán.',
+                        precio: 40,
+                        imagen: 'galleta 6.jpeg',
+                        tipo: 'galleta'
+                    },
+                    {
+                        id: 'c-galleta-3',
+                        nombre: 'Lotus Biscoff',
+                        descripcion: 'Cookie de vainilla con trozos de chocolate blanco y galleta Lotus Biscoff con un toque de canela, rellena de crema Biscoff.',
+                        precio: 50,
+                        imagen: 'galleta 8.jpeg',
+                        tipo: 'galleta'
+                    },
+                    {
+                        id: 'c-pay-1',
+                        nombre: 'Pay de Queso',
+                        descripcion: 'Rebanada de nuestro pay de queso artesanal.',
+                        precio: 40,
+                        imagen: 'pay de queso.jpg',
+                        tipo: 'pay'
+                    }
+                ]
+            }
+        ];
+
+        const PASOS_DATA = [
+            { icono: 'mouse-pointer-click', titulo: 'Elige tus favoritos', descripcion: 'Selecciona las galletas y pays del menú activo de la semana y agrégalos al carrito.' },
+            { icono: 'clock', titulo: 'Pide antes del martes', descripcion: 'Realiza tu pedido antes del martes a la 1:00 PM.' },
+            { icono: 'package-check', titulo: 'Recibe tu pedido', descripcion: 'Entrega los días jueves. Coordinamos la entrega por WhatsApp tras confirmar tu pago.' }
+        ];
+
+        let carrito = {};
+        let pedidosAbiertos = true;
+        let currentIndex = 0;
+        let cierreManualRemoto = false; // true = pedidos cerrados manualmente desde admin (Firestore)
+        let horaCierre = '13:00';       // hora límite del martes (HH:MM), configurable desde admin
+        let primerSnapshotCloud = true; // evita mostrar toast en la primera carga
+        let menuActivoId = null;        // id del menú activo por rotación semanal
+
+        // =============================================
+        // ROTACIÓN AUTOMÁTICA SEMANAL (A → B → C → A ...)
+        // =============================================
+        const ROTACION_EPOCH = new Date(2024, 0, 1); // lunes de referencia (semana 0 = Rotación A)
+        const BADGE_ACTIVO = '✨ MENÚ DISPONIBLE ESTA SEMANA';
+        const BADGE_PROXIMO = '🔒 PRÓXIMA ROTACIÓN';
+        const IMAGEN_PAY_DEFAULT = 'pay de queso.jpg';
+
+        // Lunes 00:00 de la semana de la fecha dada
+        function getInicioSemana(fecha = new Date()) {
+            const inicio = new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate());
+            inicio.setDate(inicio.getDate() - ((inicio.getDay() + 6) % 7));
+            return inicio;
+        }
+
+        function getIndiceRotacion(total) {
+            const semanas = Math.round((getInicioSemana() - ROTACION_EPOCH) / (7 * 24 * 60 * 60 * 1000));
+            return ((semanas % total) + total) % total;
+        }
+
+        // Marca como activo el menú de la semana actual. Devuelve true si cambió.
+        function aplicarRotacionAutomatica() {
+            if (!MENUS_DATA.length) return false;
+            const idx = getIndiceRotacion(MENUS_DATA.length);
+            const nuevoId = MENUS_DATA[idx].id;
+            MENUS_DATA.forEach((m, i) => {
+                m.activo = (i === idx);
+                m.badge = m.activo ? BADGE_ACTIVO : BADGE_PROXIMO;
+            });
+            const cambio = nuevoId !== menuActivoId;
+            if (cambio) {
+                menuActivoId = nuevoId;
+                currentIndex = idx;
+            }
+            return cambio;
+        }
+
+        // Repara imágenes de pay vacías o con la ruta antigua que no existe
+        function normalizarImagenes(menus) {
+            menus.forEach(m => (m.productos || []).forEach(p => {
+                if (p.tipo === 'pay' && (p.imagen === undefined || p.imagen === 'pay_de_queso.jpeg')) {
+                    p.imagen = IMAGEN_PAY_DEFAULT;
+                }
+            }));
+        }
+
+        // =============================================
+        // FIRESTORE: BASE DE DATOS EN TIEMPO REAL
+        // =============================================
+        const db = firebase.firestore();
+
+        // =============================================
+        // AVISO IMPORTANTE (controlado desde el admin)
+        // =============================================
+        function actualizarAviso(activo, imagen) {
+            const visible = activo && !!imagen;
+            const bubble = document.getElementById('aviso-bubble');
+            bubble.classList.toggle('hidden', !visible);
+            bubble.classList.toggle('flex', visible);
+            document.getElementById('aviso-img').src = visible ? imagen : '';
+            if (!visible) cerrarAviso();
+        }
+
+        function abrirAviso() {
+            document.getElementById('aviso-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function cerrarAviso() {
+            document.getElementById('aviso-modal').classList.add('hidden');
+            if (document.getElementById('cart-drawer').classList.contains('drawer-closed')) {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function iniciarSincronizacionCloud() {
+            db.collection('configuracion').doc('datos_tienda').onSnapshot((doc) => {
+                if (!doc.exists) {
+                    primerSnapshotCloud = false;
+                    return;
+                }
+
+                const data = doc.data();
+                let datosActualizados = false;
+
+                if (Array.isArray(data.menus) && data.menus.length > 0) {
+                    MENUS_DATA = data.menus;
+                    normalizarImagenes(MENUS_DATA);
+                    menuActivoId = null;
+                    aplicarRotacionAutomatica();
+                    datosActualizados = true;
+                }
+
+                cierreManualRemoto = !!(data.config && data.config.cierreManual === true);
+                const horaNueva = data.config && /^\d{1,2}:\d{2}$/.test(data.config.horaCierre) ? data.config.horaCierre : '13:00';
+                if (horaNueva !== horaCierre) {
+                    horaCierre = horaNueva;
+                    actualizarTextosHora();
+                }
+
+                const cfg = data.config || {};
+                actualizarAviso(cfg.avisoActivo === true, cfg.avisoImagen || '');
+
+                renderMenuCarousel();
+                updateCountdown();
+
+                if (primerSnapshotCloud) {
+                    primerSnapshotCloud = false;
+                } else if (datosActualizados) {
+                    mostrarToast('Menú actualizado en tiempo real ☁️', 'exito');
+                }
+            }, (error) => {
+                console.warn('[Cookie Bliss] Error escuchando Firestore:', error);
+                primerSnapshotCloud = false;
+            });
+        }
+
+        function cargarCarritoDesdeStorage() {
+            try {
+                const guardado = localStorage.getItem(STORAGE_KEYS.CARRITO);
+                if (guardado) carrito = JSON.parse(guardado);
+            } catch (e) {
+                carrito = {};
+            }
+        }
+
+        function guardarCarritoEnStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEYS.CARRITO, JSON.stringify(carrito));
+            } catch (e) { }
+        }
+
+
+        const formatearPrecio = (p) => `$${p} MXN`;
+        const getTotalItems = () => Object.values(carrito).reduce((s, i) => s + i.cantidad, 0);
+        const getSubtotal = () => Object.values(carrito).reduce((s, i) => s + (i.precio * i.cantidad), 0);
+
+        function updateCartBadge() {
+            const badge = document.getElementById('cart-count-badge');
+            const total = getTotalItems();
+            badge.textContent = total;
+            if (total === 0) {
+                badge.classList.add('opacity-0', 'scale-0');
+            } else {
+                badge.classList.remove('opacity-0', 'scale-0');
+                badge.classList.add('animate-pop');
+                setTimeout(() => badge.classList.remove('animate-pop'), 350);
+            }
+        }
+
+        function agregarAlCarrito(productoId, nombre, precio, imagen) {
+            if (!pedidosAbiertos) {
+                mostrarToast('Los pedidos están cerrados. Vuelve pronto 🍪', 'cerrado');
+                return;
+            }
+
+            if (carrito[productoId]) {
+                carrito[productoId].cantidad += 1;
+            } else {
+                carrito[productoId] = { id: productoId, nombre, precio, imagen, cantidad: 1 };
+            }
+
+            guardarCarritoEnStorage();
+            updateCartBadge();
+            renderCartItems();
+            mostrarToast(`¡${nombre} agregado! 🍪`, 'exito');
+        }
+
+        function cambiarCantidad(productoId, delta) {
+            if (!carrito[productoId]) return;
+            carrito[productoId].cantidad += delta;
+            if (carrito[productoId].cantidad <= 0) delete carrito[productoId];
+            guardarCarritoEnStorage();
+            updateCartBadge();
+            renderCartItems();
+        }
+
+        function eliminarDelCarrito(productoId) {
+            if (!carrito[productoId]) return;
+            const nombre = carrito[productoId].nombre;
+            delete carrito[productoId];
+            guardarCarritoEnStorage();
+            updateCartBadge();
+            renderCartItems();
+            mostrarToast(`${nombre} eliminado`, 'exito');
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cart-items-container');
+            const items = Object.values(carrito);
+            const total = getSubtotal();
+            const totalItems = getTotalItems();
+
+            document.getElementById('drawer-subtitle').textContent = `${totalItems} ${totalItems === 1 ? 'producto' : 'productos'}`;
+            document.getElementById('cart-total').textContent = formatearPrecio(total);
+
+            const btnWA = document.getElementById('btn-whatsapp');
+            btnWA.disabled = items.length === 0;
+
+            if (items.length === 0) {
+                container.innerHTML = `
+                  <div class="flex flex-col items-center justify-center h-full text-center py-12">
+                    <div class="w-20 h-20 rounded-full bg-cb-secondary/20 flex items-center justify-center mb-4 pointer-events-none">
+                      <i data-lucide="cookie" class="w-10 h-10 text-cb-secondary pointer-events-none"></i>
+                    </div>
+                    <p class="text-base font-semibold text-cb-primary mb-1">Tu carrito está vacío</p>
+                    <p class="text-sm text-cb-text/60 max-w-[240px]">¡Elige tus galletas favoritas del menú de la semana!</p>
+                    <button type="button" onclick="closeDrawer(); document.getElementById('menu').scrollIntoView({behavior:'smooth'})"
+                            class="btn-interactive mt-5 inline-flex items-center gap-2 bg-cb-primary text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:bg-cb-primary/90 pointer-events-auto cursor-pointer">
+                      <i data-lucide="utensils" class="w-4 h-4 pointer-events-none"></i>
+                      <span class="pointer-events-none">Ver menú</span>
+                    </button>
+                  </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            let html = '<ul class="space-y-3">';
+            items.forEach(item => {
+                html += `
+                  <li class="flex gap-3 bg-cb-bg/40 rounded-2xl p-3 border border-cb-secondary/10">
+                    <div class="w-16 h-16 rounded-xl overflow-hidden bg-cb-bg shrink-0 pointer-events-none">
+                      ${item.imagen
+                        ? `<img src="${item.imagen}" alt="${item.nombre}" class="w-full h-full object-cover pointer-events-none">`
+                        : '<div class="w-full h-full flex items-center justify-center text-2xl">🍪</div>'}
+                    </div>
+                    <div class="flex-1 min-w-0 flex flex-col">
+                      <div class="flex items-start justify-between gap-2">
+                        <h4 class="text-sm font-bold text-cb-primary leading-tight line-clamp-2">${item.nombre}</h4>
+                        <button type="button" data-action="eliminar" data-id="${item.id}" aria-label="Eliminar ${item.nombre}"
+                                class="btn-eliminar btn-interactive shrink-0 w-6 h-6 rounded-full hover:bg-cb-primary/10 flex items-center justify-center pointer-events-auto cursor-pointer">
+                          <i data-lucide="trash-2" class="w-3.5 h-3.5 text-cb-primary/70 pointer-events-none"></i>
+                        </button>
+                      </div>
+                      <p class="text-[11px] text-cb-text/60 mt-0.5">${formatearPrecio(item.precio)} c/u</p>
+
+                      <div class="flex items-center justify-between mt-auto pt-2">
+                        <div class="flex items-center gap-1.5 bg-cb-card rounded-full border border-cb-secondary/20 px-1 py-0.5">
+                          <button type="button" data-action="restar" data-id="${item.id}" aria-label="Restar"
+                                  class="btn-restar btn-interactive w-6 h-6 rounded-full hover:bg-cb-secondary/20 flex items-center justify-center pointer-events-auto cursor-pointer">
+                            <i data-lucide="minus" class="w-3.5 h-3.5 text-cb-primary pointer-events-none"></i>
+                          </button>
+                          <span class="text-sm font-bold text-cb-text min-w-[20px] text-center tabular-nums pointer-events-none">${item.cantidad}</span>
+                          <button type="button" data-action="sumar" data-id="${item.id}" aria-label="Sumar"
+                                  class="btn-sumar btn-interactive w-6 h-6 rounded-full hover:bg-cb-secondary/20 flex items-center justify-center pointer-events-auto cursor-pointer">
+                            <i data-lucide="plus" class="w-3.5 h-3.5 text-cb-primary pointer-events-none"></i>
+                          </button>
+                        </div>
+                        <span class="text-sm font-extrabold text-cb-primary tabular-nums">${formatearPrecio(item.precio * item.cantidad)}</span>
+                      </div>
+                    </div>
+                  </li>
+                `;
+            });
+            html += '</ul>';
+
+            container.innerHTML = html;
+            lucide.createIcons();
+        }
+
+        function mostrarToast(mensaje, tipo = 'exito') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colorClasses = tipo === 'cerrado'
+                ? 'bg-cb-primary text-white'
+                : 'bg-cb-card text-cb-text border border-cb-secondary/30';
+
+            toast.className = `${colorClasses} px-5 py-3 rounded-full shadow-soft text-sm font-semibold animate-slide-up pointer-events-auto flex items-center gap-2`;
+            toast.innerHTML = `
+                <i data-lucide="${tipo === 'cerrado' ? 'lock' : 'check-circle'}" class="w-4 h-4 ${tipo === 'cerrado' ? 'text-white' : 'text-cb-wa'} pointer-events-none"></i>
+                <span class="pointer-events-none">${mensaje}</span>
+            `;
+            container.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.style.transition = 'opacity 0.3s, transform 0.3s';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(100%)';
+                setTimeout(() => toast.remove(), 300);
+            }, 2200);
+        }
+
+        function openDrawer() {
+            const drawer = document.getElementById('cart-drawer');
+            drawer.classList.remove('drawer-closed');
+            document.body.classList.add('no-scroll');
+            renderCartItems();
+        }
+
+        function closeDrawer() {
+            const drawer = document.getElementById('cart-drawer');
+            drawer.classList.add('drawer-closed');
+            document.body.classList.remove('no-scroll');
+        }
+
+        function enviarPedidoPorWhatsApp() {
+            const items = Object.values(carrito);
+            if (items.length === 0) {
+                mostrarToast('Tu carrito está vacío', 'cerrado');
+                return;
+            }
+
+            const notas = document.getElementById('cart-notes').value.trim();
+            const total = getSubtotal();
+
+            let mensaje = '¡Hola Cookie Bliss! 🍪 Quería realizar el siguiente pedido para esta semana:\n\n';
+            items.forEach(item => {
+                const subtotal = item.precio * item.cantidad;
+                mensaje += `• ${item.cantidad}x ${item.nombre} - $${subtotal} MXN\n`;
+            });
+
+            mensaje += `\n*Total:* $${total} MXN`;
+            if (notas) mensaje += `\n*Notas:* ${notas}`;
+            mensaje += `\n\n¡Quedo a la espera para confirmación de mi pago y entrega!`;
+
+            const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
+            window.open(url, '_blank');
+
+            carrito = {};
+            guardarCarritoEnStorage();
+            updateCartBadge();
+            renderCartItems();
+            document.getElementById('cart-notes').value = '';
+
+            mostrarToast('¡Pedido enviado! Revisa WhatsApp 🎉', 'exito');
+            setTimeout(closeDrawer, 800);
+        }
+
+        function renderMenuCarousel() {
+            const carousel = document.getElementById('menu-carousel');
+            carousel.innerHTML = '';
+
+            MENUS_DATA.forEach((menu) => {
+                const card = document.createElement('article');
+                card.className = 'carousel-card relative bg-cb-card rounded-3xl shadow-soft border border-cb-secondary/20 overflow-hidden';
+                card.dataset.menuId = menu.id;
+
+                const badgeClass = menu.activo ? 'bg-cb-primary text-white' : 'bg-cb-text/40 text-white/90';
+
+                let html = `
+                  <div class="px-5 pt-5 pb-3">
+                    <span class="inline-block ${badgeClass} text-[10px] sm:text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-full mb-3 pointer-events-none">
+                      ${menu.badge}
+                    </span>
+                    <h3 class="text-xl sm:text-2xl font-extrabold text-cb-primary pointer-events-none">${menu.nombre}</h3>
+                    <p class="text-xs sm:text-sm text-cb-text/60 mt-1 pointer-events-none">
+                      ${menu.activo ? '3 galletas + 1 pay disponibles' : 'Rotación futura'}
+                    </p>
+                  </div>
+                  <div class="px-4 pb-4 grid grid-cols-2 gap-3">
+                `;
+
+                menu.productos.forEach(prod => {
+                    const tipoLabel = prod.tipo === 'pay' ? 'Pay' : 'Galleta';
+                    const tipoColor = prod.tipo === 'pay' ? 'bg-cb-secondary/30 text-cb-primary' : 'bg-cb-secondary/20 text-cb-primary';
+                    const botonDeshabilitado = !menu.activo || !pedidosAbiertos;
+                    const botonClass = botonDeshabilitado
+                        ? 'bg-cb-text/20 text-white cursor-not-allowed'
+                        : 'bg-cb-secondary hover:bg-cb-secondary/80 text-white';
+
+                    html += `
+                    <div class="bg-cb-bg/40 rounded-2xl overflow-hidden shadow-product border border-cb-secondary/10 flex flex-col">
+                      <div class="relative aspect-square overflow-hidden bg-cb-bg pointer-events-none">
+                        ${prod.imagen
+                          ? `<img src="${prod.imagen}" alt="${prod.nombre}" loading="lazy"
+                             class="w-full h-full object-cover pointer-events-none ${botonDeshabilitado ? 'grayscale-[40%]' : ''}">`
+                          : '<div class="w-full h-full flex items-center justify-center text-5xl pointer-events-none">🍪</div>'}
+                        <span class="absolute top-2 left-2 ${tipoColor} text-[9px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full backdrop-blur-sm pointer-events-none">
+                          ${tipoLabel}
+                        </span>
+                        ${!menu.activo ? `
+                          <div class="pointer-events-none absolute inset-0 bg-cb-text/30 backdrop-blur-[1px] flex items-center justify-center">
+                            <i data-lucide="lock" class="w-6 h-6 text-white/90 pointer-events-none"></i>
+                          </div>
+                        ` : ''}
+                      </div>
+                      <div class="p-2.5 flex flex-col flex-1">
+                        <h4 class="text-[13px] font-bold text-cb-primary leading-tight mb-1 line-clamp-2 pointer-events-none">${prod.nombre}</h4>
+                        <p class="text-[10px] text-cb-text/70 leading-snug mb-2 line-clamp-2 flex-1 pointer-events-none">${prod.descripcion}</p>
+                        <div class="flex items-center justify-between mt-auto">
+                          <span class="text-sm font-extrabold text-cb-primary pointer-events-none">${formatearPrecio(prod.precio)}</span>
+                          <button
+                            type="button"
+                            data-product-id="${prod.id}"
+                            data-product-nombre="${prod.nombre}"
+                            data-product-precio="${prod.precio}"
+                            data-product-imagen="${prod.imagen}"
+                            ${botonDeshabilitado ? 'disabled' : ''}
+                            class="btn-agregar btn-interactive relative z-20 w-8 h-8 rounded-full ${botonClass} flex items-center justify-center font-bold pointer-events-auto cursor-pointer"
+                            aria-label="Agregar ${prod.nombre} al carrito">
+                            <i data-lucide="${botonDeshabilitado ? 'lock' : 'plus'}" class="w-4 h-4 pointer-events-none"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                });
+
+                html += `</div>`;
+                card.innerHTML = html;
+                carousel.appendChild(card);
+            });
+
+            lucide.createIcons();
+            updateCarouselPosition();
+            renderCarouselDots();
+        }
+
+        function updateCarouselPosition() {
+            const cards = document.querySelectorAll('#menu-carousel .carousel-card');
+            const total = cards.length;
+
+            cards.forEach((card, index) => {
+                let diff = index - currentIndex;
+                if (diff > total / 2) diff -= total;
+                if (diff < -total / 2) diff += total;
+
+                card.classList.remove('is-center', 'is-left', 'is-right', 'is-hidden');
+
+                if (diff === 0) {
+                    card.classList.add('is-center');
+                } else if (diff === 1) {
+                    card.classList.add('is-right');
+                } else if (diff === -1) {
+                    card.classList.add('is-left');
+                } else {
+                    card.classList.add('is-hidden');
+                }
+            });
+        }
+
+        function goToMenu(index) {
+            const total = MENUS_DATA.length;
+            currentIndex = ((index % total) + total) % total;
+            updateCarouselPosition();
+            updateActiveDot();
+        }
+
+        function nextMenu() { goToMenu(currentIndex + 1); }
+        function prevMenu() { goToMenu(currentIndex - 1); }
+
+        function renderCarouselDots() {
+            const dotsContainer = document.getElementById('carousel-dots');
+            dotsContainer.innerHTML = '';
+
+            MENUS_DATA.forEach((_, index) => {
+                const dot = document.createElement('button');
+                dot.type = 'button';
+                dot.className = `dot-btn w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer pointer-events-auto ${index === currentIndex ? 'bg-cb-primary w-6' : 'bg-cb-secondary/40'
+                    }`;
+                dot.dataset.index = index;
+                dot.setAttribute('aria-label', `Ir al menú ${index + 1}`);
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function updateActiveDot() {
+            document.querySelectorAll('#carousel-dots .dot-btn').forEach((dot, i) => {
+                dot.className = i === currentIndex
+                    ? 'dot-btn w-6 h-2.5 rounded-full bg-cb-primary transition-all duration-300 cursor-pointer pointer-events-auto'
+                    : 'dot-btn w-2.5 h-2.5 rounded-full bg-cb-secondary/40 transition-all duration-300 cursor-pointer pointer-events-auto';
+            });
+        }
+
+        function renderHowItWorks() {
+            const container = document.getElementById('how-it-works-steps');
+            container.innerHTML = '';
+
+            PASOS_DATA.forEach((paso, index) => {
+                const card = document.createElement('div');
+                card.className = 'bg-cb-card rounded-3xl shadow-card border border-cb-secondary/20 p-6 text-center relative';
+                card.innerHTML = `
+                  <div class="relative inline-flex items-center justify-center mb-4 pointer-events-none">
+                    <div class="w-16 h-16 rounded-full bg-cb-secondary/20 flex items-center justify-center pointer-events-none">
+                      <i data-lucide="${paso.icono}" class="w-7 h-7 text-cb-primary pointer-events-none"></i>
+                    </div>
+                    <span class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-cb-primary text-white text-xs font-extrabold flex items-center justify-center shadow-sm pointer-events-none">
+                      ${index + 1}
+                    </span>
+                  </div>
+                  <h3 class="text-lg font-extrabold text-cb-primary mb-2 pointer-events-none">${paso.titulo}</h3>
+                  <p class="text-sm text-cb-text/70 leading-relaxed pointer-events-none">${paso.descripcion}</p>
+                `;
+                container.appendChild(card);
+            });
+            lucide.createIcons();
+        }
+
+        // Cierre: martes a la hora configurada en el panel. Los pedidos abren el lunes 00:00.
+        function getCierreSemana() {
+            const [h, m] = horaCierre.split(':').map(Number);
+            const cierre = getInicioSemana();
+            cierre.setDate(cierre.getDate() + 1);
+            cierre.setHours(h, m || 0, 0, 0);
+            return cierre;
+        }
+
+        // "13:00" -> "1:00 PM"
+        function formatearHora(hhmm) {
+            const [h, m] = hhmm.split(':').map(Number);
+            return `${h % 12 || 12}:${String(m || 0).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
+        }
+
+        // Actualiza todos los textos que mencionan la hora límite
+        function actualizarTextosHora() {
+            const txt = formatearHora(horaCierre);
+            document.querySelectorAll('.hora-cierre-txt').forEach(el => { el.textContent = txt; });
+            PASOS_DATA[1].descripcion = `Realiza tu pedido antes del martes a la ${txt}.`;
+            renderHowItWorks();
+        }
+
+        function updateCountdown() {
+            // Si cambió la semana, rota el menú automáticamente
+            if (aplicarRotacionAutomatica()) renderMenuCarousel();
+
+            const diff = getCierreSemana() - new Date();
+            const abierto = diff > 0 && !cierreManualRemoto;
+
+            if (abierto) {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                const minutes = Math.floor((diff / (1000 * 60)) % 60);
+                const seconds = Math.floor((diff / 1000) % 60);
+
+                document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
+                document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
+                document.getElementById('cd-minutes').textContent = String(minutes).padStart(2, '0');
+                document.getElementById('cd-seconds').textContent = String(seconds).padStart(2, '0');
+            }
+
+            actualizarEstadoPedidos(abierto);
+        }
+
+        function actualizarEstadoPedidos(isOpen) {
+            const anterior = pedidosAbiertos;
+            pedidosAbiertos = isOpen;
+
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+            const statusIndicator = document.getElementById('status-indicator');
+            const timerBlock = document.getElementById('timer-block');
+            const closedNotice = document.getElementById('closed-notice');
+
+            timerBlock.classList.toggle('hidden', !isOpen);
+            closedNotice.classList.toggle('hidden', isOpen);
+
+            if (isOpen) {
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-cb-wa animate-pulse-soft pointer-events-none';
+                statusText.textContent = 'Pedidos Abiertos';
+                statusText.className = 'text-xs sm:text-sm font-semibold text-cb-text whitespace-nowrap pointer-events-none';
+                statusIndicator.classList.remove('border-cb-primary/30');
+                statusIndicator.classList.add('border-cb-secondary/20');
+            } else {
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-cb-primary pointer-events-none';
+                statusText.textContent = 'Pedidos Cerrados';
+                statusText.className = 'text-xs sm:text-sm font-semibold text-cb-primary whitespace-nowrap pointer-events-none';
+                statusIndicator.classList.remove('border-cb-secondary/20');
+                statusIndicator.classList.add('border-cb-primary/30');
+                document.getElementById('closed-notice-text').textContent = cierreManualRemoto
+                    ? 'Por el momento no estamos recibiendo pedidos. ¡Vuelve pronto!'
+                    : 'Los pedidos de la próxima semana abren el lunes. ¡Vuelve pronto!';
+            }
+
+            if (anterior !== isOpen) renderMenuCarousel();
+        }
+
+        // DELEGACIÓN GLOBAL DE EVENTOS
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+            cargarCarritoDesdeStorage();
+
+            aplicarRotacionAutomatica();
+            renderMenuCarousel();
+            renderHowItWorks();
+            renderCartItems();
+            updateCartBadge();
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+
+            iniciarSincronizacionCloud();
+
+            document.getElementById('aviso-bubble').addEventListener('click', abrirAviso);
+            document.getElementById('aviso-close').addEventListener('click', cerrarAviso);
+            document.getElementById('aviso-modal').addEventListener('click', (e) => {
+                if (e.target.id === 'aviso-modal' || e.target.parentElement.id === 'aviso-modal') cerrarAviso();
+            });
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarAviso(); });
+
+            document.addEventListener('click', (e) => {
+                const btnAgregar = e.target.closest('.btn-agregar');
+                if (btnAgregar) {
+                    if (btnAgregar.disabled) return;
+                    agregarAlCarrito(
+                        btnAgregar.dataset.productId,
+                        btnAgregar.dataset.productNombre,
+                        parseFloat(btnAgregar.dataset.productPrecio),
+                        btnAgregar.dataset.productImagen
+                    );
+                    btnAgregar.classList.add('animate-pop');
+                    setTimeout(() => btnAgregar.classList.remove('animate-pop'), 350);
+                    return;
+                }
+
+                const actionBtn = e.target.closest('[data-action]');
+                if (actionBtn) {
+                    if (actionBtn.disabled) return;
+                    const id = actionBtn.dataset.id;
+                    if (actionBtn.dataset.action === 'sumar') cambiarCantidad(id, 1);
+                    else if (actionBtn.dataset.action === 'restar') cambiarCantidad(id, -1);
+                    else if (actionBtn.dataset.action === 'eliminar') eliminarDelCarrito(id);
+                    return;
+                }
+
+                const dot = e.target.closest('.dot-btn');
+                if (dot) {
+                    goToMenu(parseInt(dot.dataset.index, 10));
+                }
+            });
+
+            document.getElementById('cart-button').addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); openDrawer(); });
+            document.getElementById('drawer-close').addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); closeDrawer(); });
+            document.getElementById('drawer-backdrop').addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); closeDrawer(); });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !document.getElementById('cart-drawer').classList.contains('drawer-closed')) {
+                    closeDrawer();
+                }
+            });
+
+            document.getElementById('btn-whatsapp').addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); enviarPedidoPorWhatsApp(); });
+
+            document.getElementById('nav-prev').addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); prevMenu(); });
+            document.getElementById('nav-next').addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); nextMenu(); });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') prevMenu();
+                if (e.key === 'ArrowRight') nextMenu();
+            });
+
+            let touchStartX = 0;
+            let touchStartOnButton = null;
+            const carouselEl = document.getElementById('menu-carousel');
+            carouselEl.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+                touchStartOnButton = e.target.closest('button, a');
+            }, { passive: true });
+            carouselEl.addEventListener('touchend', (e) => {
+                if (touchStartOnButton) return;
+                const diff = touchStartX - e.changedTouches[0].screenX;
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) nextMenu();
+                    else prevMenu();
+                }
+            }, { passive: true });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        e.preventDefault();
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+
+            lucide.createIcons();
+        });
+    </script>
+
+</body>
+
+</html>
